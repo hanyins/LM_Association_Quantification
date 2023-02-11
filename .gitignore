@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# ignore all data .pkl .jsonl .csv
+*.pkl
+*.jsonl
+*.csv
+
+# ignore all output images
+*.svg
+*.png
+*.jpg
+*.jpeg
