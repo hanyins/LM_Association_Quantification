@@ -5,8 +5,6 @@ from re import L
 from collections import defaultdict
 from tqdm import tqdm
 
-
-
 def cooccur_cnt(sub_idx, obj_idx, spans):
     difference = sorted([abs(a-b) for a in sub_idx for b in obj_idx])
     diff_idx, span_idx = 0, 0
@@ -35,8 +33,6 @@ def cooccur_cnt(sub_idx, obj_idx, spans):
     return cnt
                 
         
-    
-
 def get_cooccurrence(pairs, spans=[10, 20, 50, 100, 200]):
     fnames = ["./occurrence_agg/" + s for s in os.listdir("./occurrence_agg/")]
     # cnt[(sub, obj)] = # of cooccurrence
@@ -66,8 +62,7 @@ def get_cooccurrence(pairs, spans=[10, 20, 50, 100, 200]):
 
 if __name__ == "__main__":
 
-
-    with open("TREx_pairs.pkl", "rb") as f:
+    with open("data/TREx_pairs.pkl", "rb") as f:
         pairs = pickle.load(f)
     print("# of pairs:", len(pairs))
     
@@ -78,7 +73,7 @@ if __name__ == "__main__":
     fields = ['sub', 'obj', 'span_10', 'span_20', 'span_50', 'span_100', 'span_200'] 
 
     # name of csv file 
-    filename = "cooccurrence_sub_obj.csv"
+    filename = "data/cooccurrence_sub_obj.csv"
         
     # writing to csv file 
     with open(filename, 'w') as csvfile: 
@@ -98,7 +93,7 @@ if __name__ == "__main__":
             csvwriter.writerow([sub, obj, cooccur_10, cooccur_20, cooccur_50, cooccur_100, cooccur_200])
     
     # save defaultdict
-    with open('cooccur.pkl', 'wb') as f:
+    with open('data/cooccur.pkl', 'wb') as f:
         pickle.dump(dict(cooccurrence), f)
     
 

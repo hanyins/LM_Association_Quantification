@@ -26,7 +26,7 @@ def extract_function(i):
             except:
                 errors[filename].append(key)
             
-    with open("./occurrence/occur_label_{}.pkl".format(str(i)), "wb") as f:
+    with open("./occurrence_test/occur_label_{}.pkl".format(str(i)), "wb") as f:
         pickle.dump(occurrence, f)
         
     with open("./errors/occur_label_error_{}.pkl".format(str(i)), "wb") as f:
@@ -37,17 +37,8 @@ if __name__ == "__main__":
     n = int(sys.argv[1])
     m = int(sys.argv[2])
     
-    with open("lama_label_list.pkl", "rb") as f:
+    with open("data/lama_label_list.pkl", "rb") as f:
         labels = pickle.load(f)
-    
-    # _processes = []
-    # for i in range(32):
-    #     _process = Process(target=extract_function, args=(i,))
-    #     _process.start()
-    #     _processes.append(_process)
-        
-    # for _process in _processes:
-    #     _process.join()
     
     pool = Pool(m - n)
     

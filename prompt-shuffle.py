@@ -1,22 +1,21 @@
-import json
-import pickle
-import os
+import random
+from files import *
 
-Google_RE_fnames = ["../lama/Google_RE/" + s for s in os.listdir("../lama/Google_RE/")]
-TREx_fnames = ["../lama/TREx/" + s for s in os.listdir("../lama/TREx/")]
+random.seed(8)
 
-# for find cooccurrence 
-unique_pairs = set()
+Google_RE_fnames = get_fnames_from_path("../lama/Google_RE")
+TREx_fnames = get_fnames_from_path("../lama/TREx")
+
+# for find cooccurrence
 total_count = 0
 
 # relation dict
 # skip 5 relations and rewrite 3 relations
 skip = ['P413', 'P136', 'P190', 'P1923', 'P102']
 templates = {}
-with open("../lama/relations.jsonl") as jsonlf:
-    jsonl = list(jsonlf)
-for jsonstr in jsonl:
-    relation = json.loads(jsonstr)
+
+relations = read_jsonl("../lama/relations.jsonl")
+for relation in relations:
     if relation['relation'] not in skip:
         templates[relation['relation']] = relation['template'].replace('[X]', '{}')[:-6]
     
@@ -35,21 +34,21 @@ for fname in TREx_fnames:
     relation = fname.split('/')[-1][:-6]
     if relation not in skip:
         prompts = []
+        subs, objs = [], []
         curr_template = templates[relation]
-        with open(fname, 'r') as jsonf:
-            jsonl = list(jsonf)
-        for jsonstr in jsonl:
-            data = json.loads(jsonstr)
+        
+        
+        jsonl = read_jsonl(fname)
+        for data in jsonl:
             sub, obj = data['sub_label'], data['obj_label']
-            pair = (sub, obj)
-            unique_pairs.add(pair)
+            subs.append(sub)
+            objs.append(obj)
+            
+        random.shuffle(subs)
+        for sub, obj in zip(subs, objs):
             prompts.append((sub, obj, curr_template.format(sub)))
             
         total_count += len(prompts)
-        with open("./prompts/{}.pkl".format(relation), 'wb') as f:
-            pickle.dump(prompts, f)
-            
-with open("data/TREx_pairs.pkl", 'wb') as f:
-    pickle.dump(unique_pairs, f)
+        save_pickle(prompts, "./prompts_shuffle/{}.pkl".format(relation))
 
 print(total_count)

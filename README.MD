@@ -2,19 +2,22 @@ label: subject or object word
 n: the serial number of the article
 index: the index of the label occurrence
 
-### wikidump20200301 (.pkl): Dict[n] = text
+### wikidump20200301/ (.pkl): Dict[n] = text
 
-### occurrence (.pkl): Dict[label] = List ((filename, n, index))
+### occurrence.pkl: Dict[label] = count
+### occurrence_doc.pkl: Dict[label] = doc count of the label (count 1 if the label appeared in one doc)
+### occurrence/ (.pkl): Dict[label] = List ((filename, n, index))
 
-### occurrence_agg (.pkl): Dict[label][n] = List (index)
+### occurrence_agg/ (.pkl): Dict[label][n] = List (index)
 
 ### cooccurrence (.pkl .csv): Dict[(sub, obj)][span] = cnt
 
 ### prompts (.pkl): List (sub, obj, prompt)
+
+### prompts_context (.pkl): Dict[obj] = List(prompt)
 
 ### pred_result (.jsonl): Dict (Keys="sub", "obj", "predicted", "found")
 found == -1 if not found otherwise first index.
 
 e.g., {"sub": "Eibenstock", "obj": "Germany", "predicted": " the heart of the city of Munich, Germany.", "found": 1}
 
-{'P740': 0.010683760683760684, 'P108': 0.09921671018276762, 'P27': 0.3053830227743271, 'P1376': 0.7222222222222222, 'P131': 0.23723041997729852, 'P937': 0.0429769392033543, 'P176': 0.7820773930753564, 'P463': 0.12444444444444444, 'P20': 0.07869884575026233, 'P39': 0.034753363228699555, 'P407': 0.12314709236031927, 'P527': 0.20184426229508196, 'P276': 0.27424400417101147, 'P19': 0.1292372881355932, 'P47': 0.1475054229934924, 'P101': 0.12931034482758622, 'P1303': 0.040042149631190724, 'P17': 0.16666666666666666, 'P127': 0.34643377001455605, 'P103': 0.7697031729785057, 'P31': 0.40130151843817785, 'P159': 0.3164426059979317, 'P530': 0.03815261044176707, 'P495': 0.047304730473047306, 'P37': 0.5786749482401656, 'P138': 0.5193798449612403, 'P361': 0.22103004291845493, 'P140': 0.6680761099365751, 'P1001': 0.4194008559201141, 'P30': 0.04923076923076923, 'P178': 0.6452702702702703, 'P279': 0.4491701244813278, 'P449': 0.19863791146424517, 'P364': 0.4649532710280374, 'P1412': 0.20639834881320948, 'P264': 0.02097902097902098, 'P36': 0.4864864864864865, 'P106': 0.03653444676409186}

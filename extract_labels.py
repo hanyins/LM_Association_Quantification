@@ -17,5 +17,5 @@ for fname in fnames:
         uniques.add(result['obj_label'])
         
 print(len(uniques))
-with open("lama_label_list.pkl", "wb") as f:
+with open("data/lama_label_list.pkl", "wb") as f:
     pickle.dump(list(uniques), f)

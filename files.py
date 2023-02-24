@@ -33,3 +33,7 @@ def read_pickle(fname):
         data = pickle.load(f)
     return data
     
+# input: variable and file path
+def save_pickle(data, fname):
+    with open(fname, "wb") as f:
+        pickle.dump(data, f)
