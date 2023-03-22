@@ -32,40 +32,13 @@ def read_pred_result(path, w=[1, 0.5, 0.25, 0.125, 0.05]):
             assc_scores.append(get_score(cooccurrence, item['sub'], item['obj'], w))
     return success, results, assc_scores
 
-def get_acc_score_digitize(success, scores, bins):
-    scores = np.array(scores)
-    success = np.array(success)
-    
-    inds = np.digitize(scores, bins)
-    
-    avg_acc, avg_score = [], []
-    score_chunks = []
-    
-    for nbin in range(1, len(bins)):
-        avg_acc.append(np.mean(success[inds==nbin]))
-        avg_score.append(np.mean(scores[inds==nbin]))
-        
-        score_chunks.append(scores[inds==nbin])
-        
-    return avg_score, avg_acc, score_chunks
-
-def get_zero_cooccur_acc(success, scores):
-    # print(np.sum(np.array(scores) == 0))
-    return np.mean(np.array(success)[np.array(scores) == 0])
-
-def get_context_acc(model):
-    fname = f"pred_result_context/token200-{model}.jsonl"
-    res = read_jsonl(fname)
-    found = []
-    for line in res:
-        found.append(line["found"])
-    return (np.array(found) >= 0).mean()
 
 def plot_acc_score_models(bins, spans=[10, 20, 50, 100, 200], models=["2.7B-greedy", "1.3B-greedy", "125M-greedy"], markers=["D", 'H', 'p']):
+
     for model in models:
         scores = []
         
-        plt.clf()
+        # plt.clf()
         acc_list = []
         for i, span in enumerate(spans):
             weights = [0 for _ in range(5)]
@@ -77,14 +50,15 @@ def plot_acc_score_models(bins, spans=[10, 20, 50, 100, 200], models=["2.7B-gree
             success_ = success[scores>0]
             scores_ = scores[scores>0]
             avg_score, avg_acc = np.mean(scores_), np.mean(success_)
-            print(avg_score, avg_acc)
+            # print(avg_score, avg_acc)
             acc_list.append(avg_acc)
 
-        plt.plot(spans, acc_list, marker="H", ms=3)
+        plt.plot(spans, acc_list, marker="H", ms=3, label=f"{model}")
         for xy in zip(spans, acc_list):                                       # <--
             plt.annotate("%.5f"%xy[1], xy=xy, textcoords='data') 
         
-        
+    
+    plt.legend()
     plt.ylabel("LAMA Prediction Accuracy")
     plt.xlabel("# co-occurrence within distance range")
     # plt.xscale("log")

@@ -100,7 +100,7 @@ def get_context_acc(model):
         found.append(line["found"])
     return (np.array(found) >= 0).mean()
 
-def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-greedy"], markers=["D", 'H', 'p']):
+def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-greedy"], markers=["D", 'H', 'p'], draw_context=True):
     plt.clf()
     
     # prepare plots
@@ -151,9 +151,10 @@ def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-gree
         # print(f"{model} zero acc: {zero_acc}")
         # ax_joint.axhline(zero_acc, color=color, ms=2, linestyle='dashed')
         
-        acc_context = get_context_acc(model)
-        print(f"{model} context acc: {acc_context}")
-        ax_joint.axhline(acc_context, color=color, ms=2, linestyle='dashed', label=f"context-{model}")
+        if draw_context:
+            acc_context = get_context_acc(model)
+            print(f"{model} context acc: {acc_context}")
+            ax_joint.axhline(acc_context, color=color, ms=2, linestyle='dashed', label=f"context-{model}")
         
     # set xlim
     xmin10, xmax10 = np.log10([bins[0], bins[-1]])
@@ -175,7 +176,10 @@ def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-gree
     ax_marg_x.set_xlabel("Association scores")
     
     # global settings and save
-    plt.savefig("output_figs/acc_score.jpeg",dpi=150)
+    if draw_context:
+        plt.savefig("output_figs/acc_score.jpeg",dpi=150)
+    else:
+        plt.savefig("output_figs/acc_score-nocontext.jpeg",dpi=150)
     
 def plot_acc_score_models_equal(binsize=2000, models=["2.7B-greedy", "1.3B-greedy", "125M-greedy"], markers=["D", 'H', 'p']):
     plt.clf()
