@@ -5,12 +5,12 @@ import re
 import torch
 from transformers import GPT2Tokenizer, AutoModelForCausalLM
 
-gid = 1
-device = f"cuda:{gid}"
+# gid = 1
+# device = f"cuda:{gid}"
 
-tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-tokenizer.pad_token = tokenizer.eos_token
-tokenizer.padding_side = "left"
+# tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+# tokenizer.pad_token = tokenizer.eos_token
+# tokenizer.padding_side = "left"
 
 def get_prompts_context(fname):
     data = read_pickle(fname)
@@ -73,8 +73,16 @@ def get_prompts_context(fname):
 # tokens["attention_mask"] = tokens["attention_mask"][:,-MAX_TOKENS:]
 # print(type(tokens))
 
-prompts = read_pickle("prompts_context/prompts_context_50.pkl")
+# prompts = read_pickle("prompts_context/prompts_context_50.pkl")
 # prompts2 = read_pickle("prompts_context/contexts.pkl")
 
-print(prompts["Google"])
+# print(prompts["Google"])
 # print(prompts2["Google"])
+
+fnames = get_fnames_from_path("./prompts")
+count = 0
+for fname in fnames:
+    p = read_pickle(fname)
+    count += len(p)
+    
+print(count)

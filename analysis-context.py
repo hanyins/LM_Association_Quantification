@@ -15,7 +15,8 @@ if __name__ == "__main__":
         
         found = np.array(found)
         total = len(found)
-        acc = (found >= 0).mean()
-        correct = (found > 0).sum()
+        # print(found)
+        acc = (found >= 0).mean() * 100
+        correct = (found >= 0).sum()
         print(f"tokens: {tokens}\tmodel: {model}\ttotal count: {total}\tcorrect: {correct}\tacc: {acc}")
     

@@ -8,7 +8,7 @@ from scipy.stats import pearsonr, spearmanr
 colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
 
 # span_10,span_20,span_50,span_100,span_200
-def get_score(cooccurrence, sub, obj, w=[1, 0.5, 0.25, 0.125, 0.05]):
+def get_score(cooccurrence, sub, obj, w):
     cnt = list(cooccurrence[(sub, obj)].values())
     cnt.insert(0, 0)
     diff = [cnt[i] - cnt[i-1] for i in range(1, len(cnt))]
@@ -18,7 +18,7 @@ def get_score(cooccurrence, sub, obj, w=[1, 0.5, 0.25, 0.125, 0.05]):
 # success: list of binary 0 or 1
 # results: found index (or -1 if not found)
 # assc_scores: float
-def read_pred_result(path):
+def read_pred_result(path, w=[1, 0.5, 0.25, 0.125, 0.05]):
     success = []
     results = []
     assc_scores = []
@@ -31,7 +31,7 @@ def read_pred_result(path):
                 success.append(1)
             else:
                 success.append(0)
-            assc_scores.append(get_score(cooccurrence, item['sub'], item['obj']))
+            assc_scores.append(get_score(cooccurrence, item['sub'], item['obj'], w))
     return success, results, assc_scores
 
 def reject_outlier(score_chunk, acc):
@@ -129,16 +129,18 @@ def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-gree
         success, _, assc_scores = read_pred_result(f"./pred_result_base/{model}")
 
         avg_score, avg_acc, _ = get_acc_score_digitize(success, assc_scores, bins)
+        # print(f"{model} bin=0 avg acc: {avg_acc[0]}")
+        # print(f"{model} bin=1 avg acc: {avg_acc[1]}")
+        # print(f"{model} bin=2 avg acc: {avg_acc[2]}")
         
-        spearman, pvalue = spearmanr(np.log(avg_score), avg_acc)
-        pearson, ppvalue = pearsonr(np.log(avg_score), avg_acc)
-        # print(model)
-        # print("Spearman coeff:", spearman)
-        # print("P-value:", pvalue)
-        # print("Pearson coeff:", pearson)
-        # print("P-value:", ppvalue)
+        # spearman and pearson coeff. calculation
+        spearman, _ = spearmanr(np.log(avg_score), avg_acc)
+        pearson, _ = pearsonr(np.log(avg_score), avg_acc)
+        print(model)
+        print("Spearman coeff:", spearman)
+        print("Pearson coeff:", pearson)
         
-        ax_joint.plot(avg_score, avg_acc, marker=marker, ms=3, label=f"GPT-Neo-{model}\nSpearman coeff. = {spearman:.4f}\nP-value = {pvalue:.4e}")
+        ax_joint.plot(avg_score, avg_acc, marker=marker, ms=3, label=f"GPT-Neo-{model}\nSpearman coeff. = {spearman:.4f}")
         
         # success_shuffled, _, _ = read_pred_result(f"./pred_result_shuffle/{model}")
         # avg_acc_shuffled = np.mean(success_shuffled)
@@ -149,9 +151,9 @@ def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-gree
         # print(f"{model} zero acc: {zero_acc}")
         # ax_joint.axhline(zero_acc, color=color, ms=2, linestyle='dashed')
         
-        # acc_context = get_context_acc(model)
-        # print(f"{model} context acc: {acc_context}")
-        # ax_joint.axhline(acc_context, color=color, ms=2, linestyle='dashed', label=f"context-{model}")
+        acc_context = get_context_acc(model)
+        print(f"{model} context acc: {acc_context}")
+        ax_joint.axhline(acc_context, color=color, ms=2, linestyle='dashed', label=f"context-{model}")
         
     # set xlim
     xmin10, xmax10 = np.log10([bins[0], bins[-1]])
@@ -163,7 +165,7 @@ def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-gree
     # joint plot labels and titles
     ax_joint.set_ylabel("LAMA Prediction Accuracy")
     ax_joint.legend(fontsize=6)
-    ax_joint.set_title("Accuracy vs. Score")
+    # ax_joint.set_title("Accuracy vs. Score")
     
     
     # plot counts
@@ -173,7 +175,7 @@ def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-gree
     ax_marg_x.set_xlabel("Association scores")
     
     # global settings and save
-    plt.savefig("acc_score.svg")
+    plt.savefig("output_figs/acc_score.jpeg",dpi=150)
     
 def plot_acc_score_models_equal(binsize=2000, models=["2.7B-greedy", "1.3B-greedy", "125M-greedy"], markers=["D", 'H', 'p']):
     plt.clf()
@@ -185,15 +187,13 @@ def plot_acc_score_models_equal(binsize=2000, models=["2.7B-greedy", "1.3B-greed
         success, _, assc_scores = read_pred_result(f"./pred_result_base/{model}")
         avg_scores, acc, _, n = get_acc_score_equal_split(success, assc_scores, binsize=binsize)
         
-        spearman, pvalue = spearmanr(np.log(avg_scores), acc)
-        pearson, ppvalue = pearsonr(np.log(avg_scores), acc)
+        spearman, _ = spearmanr(np.log(avg_scores), acc)
+        pearson, _ = pearsonr(np.log(avg_scores), acc)
         print(model)
         print("Spearman coeff:", spearman)
-        print("P-value:", pvalue)
         print("Pearson coeff:", pearson)
-        print("P-value:", ppvalue)
         
-        plt.plot(avg_scores, acc, marker=marker, ms=3, label=f"GPT-Neo-{model}\nSpearman coeff. = {spearman:.4f}\nP-value = {pvalue:.4e}")
+        plt.plot(avg_scores, acc, marker=marker, ms=3, label=f"GPT-Neo-{model}\nSpearman coeff. = {spearman:.4f}")
         
     plt.ylabel("LAMA Prediction Accuracy")
     plt.xlabel("Association Score")

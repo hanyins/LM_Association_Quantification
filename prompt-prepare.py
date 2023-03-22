@@ -2,7 +2,7 @@ import json
 import pickle
 import os
 
-Google_RE_fnames = ["../lama/Google_RE/" + s for s in os.listdir("../lama/Google_RE/")]
+# Google_RE_fnames = ["../lama/Google_RE/" + s for s in os.listdir("../lama/Google_RE/")]
 TREx_fnames = ["../lama/TREx/" + s for s in os.listdir("../lama/TREx/")]
 
 # for find cooccurrence 
@@ -46,10 +46,10 @@ for fname in TREx_fnames:
             prompts.append((sub, obj, curr_template.format(sub)))
             
         total_count += len(prompts)
-        with open("./prompts/{}.pkl".format(relation), 'wb') as f:
-            pickle.dump(prompts, f)
+        # with open("./prompts/{}.pkl".format(relation), 'wb') as f:
+        #     pickle.dump(prompts, f)
             
-with open("data/TREx_pairs.pkl", 'wb') as f:
-    pickle.dump(unique_pairs, f)
+# with open("data/TREx_pairs.pkl", 'wb') as f:
+#     pickle.dump(unique_pairs, f)
 
 print(total_count)

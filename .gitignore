@@ -11,3 +11,6 @@ __pycache__/
 *.png
 *.jpg
 *.jpeg
+
+# test files
+test.py
