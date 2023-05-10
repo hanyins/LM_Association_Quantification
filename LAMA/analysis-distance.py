@@ -4,8 +4,14 @@ from files import *
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from scipy.stats import pearsonr, spearmanr
+from brokenaxes import brokenaxes
 
-colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
+markers_colors = {"2.7B-greedy": ("D", "#518CD8"), 
+                  "1.3B-greedy": ("H", "#FEB40B"),
+                  "125M-greedy": ("p", "#6DC354"),
+                  "6B-greedy": ("8", "#FD6D5A"),
+                  "20B-greedy": ("d", "#9467bd")}
+hist_color = "#454D66"
 
 # span_10,span_20,span_50,span_100,span_200
 def get_score(cooccurrence, sub, obj, w):
@@ -33,12 +39,11 @@ def read_pred_result(path, w=[1, 0.5, 0.25, 0.125, 0.05]):
     return success, results, assc_scores
 
 
-def plot_acc_score_models(bins, spans=[10, 20, 50, 100, 200], models=["2.7B-greedy", "1.3B-greedy", "125M-greedy"], markers=["D", 'H', 'p']):
-
+def plot_acc_score_models(bins, spans=[10, 20, 50, 100, 200], models=["6B-greedy", "2.7B-greedy", "1.3B-greedy", "125M-greedy"]):
+    bax = brokenaxes(ylims=((0.145, 0.2), (0.245, 0.45)), hspace=.2)
+    
     for model in models:
         scores = []
-        
-        # plt.clf()
         acc_list = []
         for i, span in enumerate(spans):
             weights = [0 for _ in range(5)]
@@ -53,24 +58,25 @@ def plot_acc_score_models(bins, spans=[10, 20, 50, 100, 200], models=["2.7B-gree
             # print(avg_score, avg_acc)
             acc_list.append(avg_acc)
 
-        plt.plot(spans, acc_list, marker="H", ms=3, label=f"{model}")
-        for xy in zip(spans, acc_list):                                       # <--
-            plt.annotate("%.5f"%xy[1], xy=xy, textcoords='data') 
+        marker, color = markers_colors[model]
+        bax.plot(spans, acc_list, marker=marker, color=color, ms=3, label=f"GPT-Neo-{model}")
+        for x, y in zip(spans, acc_list):                                       # <--
+            bax.annotate("%.5f"%y, xy=(x+1, y+0.001), textcoords='data') 
         
     
-    plt.legend()
-    plt.ylabel("LAMA Prediction Accuracy")
-    plt.xlabel("# co-occurrence within distance range")
+    bax.legend(fontsize=8)
+    bax.set_ylabel("LAMA Prediction Accuracy")
+    bax.set_xlabel("# Co-occurrence Within Distance Range")
     # plt.xscale("log")
     # plt.title("Accuracy vs. Co-occurrence Distance")
-    plt.grid(color="lightgray", linewidth=0.5)
-    plt.grid(which='minor', axis='y', color='lightgray', linewidth=0.3, linestyle="--")
+    bax.grid(color="lightgray", linewidth=0.5)
+    # bax.grid(which='minor', axis='y', color='lightgray', linewidth=0.3, linestyle="--")
     
 
-    plt.savefig("output_figs/acc_spans.jpeg", dpi=150)
+    plt.savefig("output_figs/acc_spans.jpeg", dpi=300, bbox_inches='tight')
     
 
-# Analysis 1 - Accuracy vs. Association score [Compare different model size]
+# Analysis - Accuracy vs. Distance [Compare different model size]
 if __name__ == "__main__":
     # equal chunks
     cooccurrence = defaultdict(lambda: defaultdict(int), read_pickle("data/cooccur.pkl"))

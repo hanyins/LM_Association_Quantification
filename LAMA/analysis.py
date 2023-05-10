@@ -5,7 +5,12 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from scipy.stats import pearsonr, spearmanr
 
-colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
+markers_colors = {"2.7B-greedy": ("D", "#518CD8"), 
+                  "1.3B-greedy": ("H", "#FEB40B"),
+                  "125M-greedy": ("p", "#6DC354"),
+                  "6B-greedy": ("8", "#FD6D5A"),
+                  "20B-greedy": ("d", "#9467bd")}
+hist_color = "#454D66"
 
 # span_10,span_20,span_50,span_100,span_200
 def get_score(cooccurrence, sub, obj, w):
@@ -100,7 +105,7 @@ def get_context_acc(model):
         found.append(line["found"])
     return (np.array(found) >= 0).mean()
 
-def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-greedy"], markers=["D", 'H', 'p'], draw_context=True):
+def plot_acc_score_models(bins, models=["6B-greedy", "2.7B-greedy", "1.3B-greedy", "125M-greedy"], markers=["D", 'H', 'p'], draw_context=True):
     plt.clf()
     
     # prepare plots
@@ -124,8 +129,8 @@ def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-gree
     
     # Turn off tick labels on marginals
     plt.setp(ax_joint.get_xticklabels(), visible=False)
-    
-    for model, marker, color in zip(models, markers, colors):
+    print("Model\tSpearman\tPearson")
+    for model in models:
         success, _, assc_scores = read_pred_result(f"./pred_result_base/{model}")
 
         avg_score, avg_acc, _ = get_acc_score_digitize(success, assc_scores, bins)
@@ -136,20 +141,10 @@ def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-gree
         # spearman and pearson coeff. calculation
         spearman, _ = spearmanr(np.log(avg_score), avg_acc)
         pearson, _ = pearsonr(np.log(avg_score), avg_acc)
-        print(model)
-        print("Spearman coeff:", spearman)
-        print("Pearson coeff:", pearson)
+        print(f"{model}\t{spearman:.4f}\t{pearson:.4f}")
         
-        ax_joint.plot(avg_score, avg_acc, marker=marker, ms=3, label=f"GPT-Neo-{model}\nSpearman coeff. = {spearman:.4f}")
-        
-        # success_shuffled, _, _ = read_pred_result(f"./pred_result_shuffle/{model}")
-        # avg_acc_shuffled = np.mean(success_shuffled)
-        # print(f"{model} shuffled acc: {avg_acc_shuffled}")
-        # ax_joint.axhline(avg_acc_shuffled, color=color, ms=2, linestyle='dashed')
-        
-        # zero_acc = get_zero_cooccur_acc(success, assc_scores)
-        # print(f"{model} zero acc: {zero_acc}")
-        # ax_joint.axhline(zero_acc, color=color, ms=2, linestyle='dashed')
+        marker, color = markers_colors[model]
+        ax_joint.plot(avg_score, avg_acc, marker=marker, color=color, ms=3, label=f"GPT-Neo-{model}\nSpearman coeff. = {spearman:.4f}")
         
         if draw_context:
             acc_context = get_context_acc(model)
@@ -170,71 +165,17 @@ def plot_acc_score_models(bins, models=["2.7B-greedy", "1.3B-greedy", "125M-gree
     
     
     # plot counts
-    counts, edges, bars = ax_marg_x.hist(assc_scores, bins=bins)
+    counts, edges, bars = ax_marg_x.hist(assc_scores, bins=bins, color=hist_color)
     ax_marg_x.bar_label(bars)
     ax_marg_x.set_ylabel("Count")
-    ax_marg_x.set_xlabel("Association scores")
+    ax_marg_x.set_xlabel("Association Easiness Scores")
     
     # global settings and save
     if draw_context:
-        plt.savefig("output_figs/acc_score.jpeg",dpi=150)
+        plt.savefig("output_figs/acc_score.jpeg",dpi=300,bbox_inches='tight')
     else:
-        plt.savefig("output_figs/acc_score-nocontext.jpeg",dpi=150)
-    
-def plot_acc_score_models_equal(binsize=2000, models=["2.7B-greedy", "1.3B-greedy", "125M-greedy"], markers=["D", 'H', 'p']):
-    plt.clf()
-    
-    # start plot - compare model size
-    plt.xscale("log")
-    
-    for model, marker in zip(models, markers):
-        success, _, assc_scores = read_pred_result(f"./pred_result_base/{model}")
-        avg_scores, acc, _, n = get_acc_score_equal_split(success, assc_scores, binsize=binsize)
-        
-        spearman, _ = spearmanr(np.log(avg_scores), acc)
-        pearson, _ = pearsonr(np.log(avg_scores), acc)
-        print(model)
-        print("Spearman coeff:", spearman)
-        print("Pearson coeff:", pearson)
-        
-        plt.plot(avg_scores, acc, marker=marker, ms=3, label=f"GPT-Neo-{model}\nSpearman coeff. = {spearman:.4f}")
-        
-    plt.ylabel("LAMA Prediction Accuracy")
-    plt.xlabel("Association Score")
-    plt.title(f"Acc vs Score (Bin Size={binsize}, # of Bins={n})")
-    plt.legend(fontsize=8)
-    plt.savefig('acc_score_equal.svg')
+        plt.savefig("output_figs/acc_score-nocontext.jpeg",dpi=300,bbox_inches='tight')
 
-def boxplot_score_chunk(model, equal=True, binsize=None, bins=None):
-    if equal:
-        if not binsize:
-            raise ValueError("binsize required when equally splitted.")
-    else:
-        if len(bins) == 0:
-            raise ValueError("bins required when splitting by scores.")
-    
-    plt.clf()
-    success, _, assc_scores = read_pred_result(f"./pred_result_base/{model}")
-    
-    if equal:
-        _, _, score_chunks, n = get_acc_score_equal_split(success, assc_scores, binsize=binsize)
-        plt.yscale("log")
-        plt.ylabel("Association Score")
-        plt.xlabel(f"{n} Score Chunks ({model})")
-        boxprops = dict(color="black",linewidth=1)
-        medianprops = dict(color="black",linewidth=1)
-        plt.boxplot(score_chunks,boxprops=boxprops,medianprops=medianprops)
-        plt.savefig("boxplot_equal.svg")
-    
-    else:
-        _, _, score_chunks = get_acc_score_digitize(success, assc_scores, bins)
-        plt.yscale("log")
-        plt.ylabel("Association Score")
-        plt.xlabel(f"Score Chunks ({model})")
-        boxprops = dict(color="black",linewidth=1)
-        medianprops = dict(color="black",linewidth=1)
-        plt.boxplot(score_chunks,boxprops=boxprops,medianprops=medianprops)
-        plt.savefig("boxplot.svg")
 
 # Analysis 1 - Accuracy vs. Association score [Compare different model size]
 if __name__ == "__main__":
@@ -247,7 +188,7 @@ if __name__ == "__main__":
     
     # chunk by score
     bins = np.array([10**(i/2) for i in range(-3,10)])
-    plot_acc_score_models(bins)
+    plot_acc_score_models(bins, draw_context=False)
     # boxplot_score_chunk("125M-greedy", equal=False, bins=bins)
     
     
