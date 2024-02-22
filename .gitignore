@@ -2,8 +2,7 @@
 __pycache__/
 .DS_Store
 
-# ignore all data .pkl .jsonl .csv
-*.pkl
+# ignore all data .jsonl .csv
 *.jsonl
 *.csv
 

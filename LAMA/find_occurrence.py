@@ -26,7 +26,7 @@ def extract_function(i):
             except:
                 errors[filename].append(key)
             
-    with open("./occurrence_test/occur_label_{}.pkl".format(str(i)), "wb") as f:
+    with open("./occurrence/occur_label_{}.pkl".format(str(i)), "wb") as f:
         pickle.dump(occurrence, f)
         
     with open("./errors/occur_label_error_{}.pkl".format(str(i)), "wb") as f:
